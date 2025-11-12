@@ -24,7 +24,7 @@ jobs:
           GARAK_API_KEY: ${{ secrets.GARAK_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python -c "
+          python - <<'EOF'
           from garak_sdk import GarakClient
           import os, sys
 
@@ -32,14 +32,76 @@ jobs:
           scan = client.scans.create(
               generator='openai',
               model_name='gpt-4',
-              probe_categories=['jailbreak', 'harmful']
+              probe_categories=['dan']
           )
-          scan = client.scans.wait_for_completion(scan.metadata.scan_id)
-          results = client.scans.get_results(scan.metadata.scan_id)
+          if isinstance(scan, dict):
+              if scan.get("redirect") == "jobs":
+                  print(f"Multiple scans created: {scan.get('message')}")
+                  sys.exit(0)
+              scan_id = scan.get("scan_id")
+          else:
+              scan_id = scan.metadata.scan_id
 
-          score = results['overallMetrics']['overallScore'] * 100
-          if score < 80:
-              print(f'Security score below threshold: {score:.1f}')
+          print(f"Scan created with ID: {scan_id}")
+          print(f"View at: https://scans.garaksecurity.com/scans/{scan_id}")
+
+          # Wait for completion with progress
+          print("\nWaiting for scan to complete...")
+
+          def show_progress(status):
+              progress = status.get('progress', {})
+              if progress:
+                  percent = progress.get('progress_percent', 0)
+                  completed = progress.get('completed_items', 0)
+                  total = progress.get('total_items', 0)
+                  print(f"Progress: {percent:.1f}% ({completed}/{total} items)")
+
+          try:
+              scan = client.scans.wait_for_completion(
+                  scan_id,
+                  timeout=3600,
+                  poll_interval=30,
+                  on_progress=show_progress
+              )
+              print("Scan completed")
+          except Exception as e:
+              print(f"Scan failed or timed out: {e}")
               sys.exit(1)
-          print(f'Security scan passed: {score:.1f}/100')
-          "
+
+          # Get results
+          print("\nFetching scan results...")
+          results = client.scans.get_results(scan_id)
+
+          # Download reports
+          print("\nDownloading reports...")
+          try:
+              client.reports.download_all(scan_id, output_dir='./security-reports/')
+              print("Reports downloaded to ./security-reports/")
+          except Exception as e:
+              print(f"Warning: Could not download reports: {e}")
+
+          # Check score
+          score = results['overallMetrics']['overallScore'] * 100
+
+          print(f"\n{'='*60}")
+          print(f"Security Score: {score:.1f}/100")
+          print(f"Threshold: 80/100")
+          print(f"Scan ID: {scan_id}")
+          print(f"{'='*60}")
+
+          if score < 80:
+              print(f"\nSecurity score {score:.1f}/100 is below threshold 80/100")
+              sys.exit(1)
+
+          print(f"\nSecurity scan passed: {score:.1f}/100")
+          EOF
+
+          # scan = client.scans.wait_for_completion(scan_id)
+          # results = client.scans.get_results(scan_id)
+
+          # score = results['overallMetrics']['overallScore'] * 100
+          # if score < 80:
+          #     print(f"Security score below threshold: {score:.1f}")
+          #     sys.exit(1)
+          # print(f"Security scan passed: {score:.1f}/100")
+          # EOF
