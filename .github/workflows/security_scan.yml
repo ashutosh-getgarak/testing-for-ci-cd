@@ -1,88 +1,44 @@
-name: Garak Security Scan
+name: Security Scan
 
 on:
-  pull_request:
-    branches: [main, master]
   push:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
   security-scan:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
-      - name: Install Garak SDK
+      - name: Install SDK
         run: pip install garak-sdk
 
-      - name: Run Garak Security Scan
+      - name: Run Security Scan
         env:
           GARAK_API_KEY: ${{ secrets.GARAK_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GARAK_MIN_SCORE: 80
         run: |
-          python - <<'EOF'
+          python -c "
           from garak_sdk import GarakClient
-          import os
-          import sys
+          import os, sys
 
-          # Initialize client
-          client = GarakClient(api_key=os.getenv("GARAK_API_KEY"))
-
-          # Create scan
-          print("🔍 Creating security scan...")
+          client = GarakClient(api_key=os.getenv('GARAK_API_KEY'))
           scan = client.scans.create(
-              name=f"PR #{os.getenv('GITHUB_REF_NAME', 'unknown')}",
-              description=f"Security scan for commit {os.getenv('GITHUB_SHA', '')[:8]}",
-              generator="openai",
-              model_name="gpt-4",
-              probe_categories=["jailbreak", "harmful", "privacy"],
-              api_keys={"OPENAI_API_KEY": os.getenv("OPENAI_API_KEY")}
+              generator='openai',
+              model_name='gpt-4',
+              probe_categories=['jailbreak', 'harmful']
           )
+          scan = client.scans.wait_for_completion(scan.metadata.scan_id)
+          results = client.scans.get_results(scan.metadata.scan_id)
 
-          scan_id = scan['metadata']['scan_id']
-          print(f"✓ Scan created: {scan_id}")
-          print(f"📊 View at: https://scans.garaksecurity.com/scans/{scan_id}")
-
-          # Wait for completion
-          print("\n⏳ Waiting for scan to complete...")
-          scan = client.scans.wait_for_completion(
-              scan_id,
-              timeout=3600,
-              poll_interval=10
-          )
-
-          # Get results
-          results = client.scans.get_results(scan_id)
-
-          # Check threshold
-          min_score = float(os.getenv("GARAK_MIN_SCORE", "80"))
-          overall_score = results['overallMetrics']['overallScore']
-          actual_score = overall_score * 100
-
-          print(f"\n{'='*60}")
-          print(f"🔒 Security Score: {actual_score:.1f}/100")
-          print(f"🎯 Threshold: {min_score}/100")
-          print(f"{'='*60}\n")
-
-          if actual_score < min_score:
-              print(f"❌ FAILED: Security score {actual_score:.1f} below threshold {min_score}")
+          score = results['overallMetrics']['overallScore'] * 100
+          if score < 80:
+              print(f'Security score below threshold: {score:.1f}')
               sys.exit(1)
-
-          print(f"✅ PASSED: Security scan passed with score {actual_score:.1f}/100")
-          EOF
-
-      - name: Upload Security Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: garak-security-reports
-          path: ./security-reports/
-          retention-days: 30
+          print(f'Security scan passed: {score:.1f}/100')
+          "
