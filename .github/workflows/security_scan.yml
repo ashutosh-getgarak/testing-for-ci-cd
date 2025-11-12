@@ -24,7 +24,7 @@ jobs:
           GARAK_API_KEY: ${{ secrets.GARAK_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python -c "
+          python -c ```
           from garak_sdk import GarakClient
           import os, sys
 
@@ -49,4 +49,4 @@ jobs:
               print(f'Security score below threshold: {score:.1f}')
               sys.exit(1)
           print(f'Security scan passed: {score:.1f}/100')
-          "
+          ```
