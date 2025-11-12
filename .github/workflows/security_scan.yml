@@ -34,6 +34,10 @@ jobs:
               model_name='gpt-4',
               probe_categories=['dan']
           )
+          print('DEBUG: Full scan response received:')
+          print('Type: ' + str(type(scan_response)))
+          print('\nResponse object attributes:')
+          print(dir(scan_response))
           scan = client.scans.wait_for_completion(scan.metadata.scan_id)
           results = client.scans.get_results(scan.metadata.scan_id)
 
