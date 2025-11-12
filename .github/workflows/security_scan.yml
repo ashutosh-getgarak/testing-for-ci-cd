@@ -36,8 +36,8 @@ jobs:
           )
           
           scan_id = scan['metadata']['scan_id']
-              print(f"✓ Scan created with ID: {scan_id}")
-              print(f"📊 View details at: https://scans.garaksecurity.com/scans/{scan_id}")
+          print(f"✓ Scan created with ID: {scan_id}")
+          print(f"📊 View details at: https://scans.garaksecurity.com/scans/{scan_id}")
               
           scan = client.scans.wait_for_completion(scan_id)
           results = client.scans.get_results(scan_id)
