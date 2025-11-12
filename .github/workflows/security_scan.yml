@@ -32,7 +32,7 @@ jobs:
           scan = client.scans.create(
               generator='openai',
               model_name='gpt-4',
-              probe_categories=['jailbreak', 'harmful']
+              probe_categories=['dan']
           )
           scan = client.scans.wait_for_completion(scan.metadata.scan_id)
           results = client.scans.get_results(scan.metadata.scan_id)
