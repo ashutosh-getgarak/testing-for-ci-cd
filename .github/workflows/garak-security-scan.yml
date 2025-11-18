@@ -48,11 +48,11 @@ jobs:
               "method": "POST",
               "headers": {
                     "Content-Type": "application/json"
-},  # Contains user's API keys
+                    },
               "req_template_json_object": {
                     "message": "Hello, how are you?",
                     "user_id": "test"
-},
+                    },
               "response_json_field": "$.choices[0].message.content"
           }
 
