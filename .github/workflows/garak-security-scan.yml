@@ -29,7 +29,7 @@ jobs:
       - name: Run Garak Security Scan
         # TODO: Move API keys to GitHub Secrets in future iteration
         env:
-          GARAK_API_KEY: "garak_MNjDyWXP614aYBWY36v1hmA0l4fuJtwCyxV9HJx13hE"  # Auto-generated Garak platform key
+          GARAK_API_KEY: "garak_7O6hcR2yzsca_HhhA5uM6cUSV9T4751JM_jhqOc86SU"  # Auto-generated Garak platform key
         run: |
           python << 'EOF'
           import os
@@ -49,7 +49,7 @@ jobs:
           scan = client.scans.create(
               generator="rest",
               model_name="https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
-              probe_categories=["dan"],
+              probe_categories=["dan", "security", "privacy", "toxicity", "hallucination", "performance", "robustness", "ethics", "stereotype"],
               name=f"GitHub Actions Scan",
               description=f"Automated scan from GitHub Actions",
               parallel_attempts=4,
