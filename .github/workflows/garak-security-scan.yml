@@ -29,7 +29,7 @@ jobs:
       - name: Run Garak Security Scan
         # TODO: Move API keys to GitHub Secrets in future iteration
         env:
-          GARAK_API_KEY: "garak_KVQWAu3pxCB421TRoSVlRJ1PshpTGi-K9ZRKo5mKNmQ"  # Auto-generated Garak platform key
+          GARAK_API_KEY: "garak_MNjDyWXP614aYBWY36v1hmA0l4fuJtwCyxV9HJx13hE"  # Auto-generated Garak platform key
         run: |
           python << 'EOF'
           import os
