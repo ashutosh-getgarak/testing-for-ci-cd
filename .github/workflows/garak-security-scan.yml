@@ -29,7 +29,7 @@ jobs:
       - name: Run Garak Security Scan
         # TODO: Move API keys to GitHub Secrets in future iteration
         env:
-          GARAK_API_KEY: "garak_efAJE6awsqj85TkwkyRmZt9s1FEoToWxmoQO6CZce0k"  # Auto-generated Garak platform key
+          GARAK_API_KEY: "garak_fOHUNNq7hdLIP9iZVW-z1xkIDcQNFXJRW_9jvpfRHks"  # Auto-generated Garak platform key
         run: |
           python << 'EOF'
           import os
@@ -41,21 +41,6 @@ jobs:
           # Initialize Garak client
           client = GarakClient(api_key=os.environ['GARAK_API_KEY'])
 
-          # User's REST API configuration
-          # TODO: Extract sensitive headers to GitHub Secrets
-          rest_config = {
-              "uri": "https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
-              "method": "POST",
-              "headers": {
-                    "Content-Type": "application/json"
-                    },
-              "req_template_json_object": {
-                    "message": "Hello, how are you?",
-                    "user_id": "test"
-                    },
-              "response_json_field": "$.choices[0].message.content"
-          }
-
           # Start security scan
           print("Starting Garak security scan...")
           print(f"Target endpoint: https://vulnerable-chatbot-765684604189.us-central1.run.app/chat")
@@ -65,11 +50,19 @@ jobs:
               generator="rest",
               model_name="https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
               probe_categories=["dan", "security", "privacy", "toxicity", "hallucination", "performance", "robustness", "ethics", "stereotype"],
-              rest_config=rest_config,
               name=f"GitHub Actions Scan - ${{ github.sha[:7] }}",
               description=f"Automated scan from GitHub Actions - ${{ github.workflow }} #${{ github.run_number }}",
               parallel_attempts=4,
-              use_free_tier=False
+              use_free_tier=False,
+              rest_config={
+                  "uri": "https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
+                  "method": "POST",
+                  "headers": {"Content-Type": "application/json"},
+                  "req_template_json_object": {"message": "Hello, how are you?", "user_id": "test"},
+                  "response_json_field": "$.choices[0].message.content",
+                  "response_json": True,
+                  "verify_ssl": True
+              }
           )
 
           # Handle response - extract scan_id
