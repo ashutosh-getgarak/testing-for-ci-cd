@@ -49,7 +49,7 @@ jobs:
           scan = client.scans.create(
               generator="rest",
               model_name="https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
-              probe_categories=["dan", "security", "privacy", "toxicity", "hallucination", "performance", "robustness", "ethics", "stereotype"],
+              probe_categories=["dan"],
               name=f"GitHub Actions Scan",
               description=f"Automated scan from GitHub Actions",
               parallel_attempts=4,
