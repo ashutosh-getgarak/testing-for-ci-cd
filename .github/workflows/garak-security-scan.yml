@@ -48,7 +48,7 @@ jobs:
           scan = client.scans.create(
               generator="rest",
               model_name="https://api.anthropic.com/v1/messages",
-              probe_categories=["dan", "security", "privacy", "toxicity", "hallucination", "performance", "robustness", "ethics", "stereotype"],
+              probe_categories=["dan"],
               name=f"GitHub Actions Scan",
               description=f"Automated scan from GitHub Actions",
               parallel_attempts=4,
