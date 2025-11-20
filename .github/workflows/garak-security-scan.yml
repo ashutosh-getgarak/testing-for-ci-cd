@@ -27,9 +27,8 @@ jobs:
           pip install garak-sdk requests
 
       - name: Run Garak Security Scan
-        # TODO: Move API keys to GitHub Secrets in future iteration
         env:
-          GARAK_API_KEY: "garak_7O6hcR2yzsca_HhhA5uM6cUSV9T4751JM_jhqOc86SU"  # Auto-generated Garak platform key
+          GARAK_API_KEY: ${{ secrets.GARAK_API_KEY }}
         run: |
           python << 'EOF'
           import os
@@ -43,22 +42,22 @@ jobs:
 
           # Start security scan
           print("Starting Garak security scan...")
-          print(f"Target endpoint: https://vulnerable-chatbot-765684604189.us-central1.run.app/chat")
+          print(f"Target endpoint: https://api.anthropic.com/v1/messages")
           print(f"Probes: dan,security,privacy,toxicity,hallucination,performance,robustness,ethics,stereotype")
 
           scan = client.scans.create(
               generator="rest",
-              model_name="https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
+              model_name="https://api.anthropic.com/v1/messages",
               probe_categories=["dan", "security", "privacy", "toxicity", "hallucination", "performance", "robustness", "ethics", "stereotype"],
               name=f"GitHub Actions Scan",
               description=f"Automated scan from GitHub Actions",
               parallel_attempts=4,
               use_free_tier=False,
               rest_config={
-                  "uri": "https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
+                  "uri": "https://api.anthropic.com/v1/messages",
                   "method": "POST",
-                  "headers": {"Content-Type": "application/json"},
-                  "req_template_json_object": {"message": "Hello, how are you?", "user_id": "test"},
+                  "headers": {"anthropic-version": "2023-06-01", "content-type": "application/json", "x-api-key": "${{ secrets.X_API_KEY }}", "Content-Type": "application/json"},
+                  "req_template_json_object": {"max_tokens": 1024, "messages": [{"content": "Hello, world", "role": "user"}], "model": "claude-sonnet-4-5-20250929"},
                   "response_json_field": "$.choices[0].message.content",
                   "response_json": True,
                   "verify_ssl": True
