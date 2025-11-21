@@ -56,9 +56,9 @@ jobs:
               rest_config={
                   "uri": "https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
                   "method": "POST",
-                  "headers": {"Content-Type": "application/json"},
-                  "req_template_json_object": {"message": "Hello, how are you?", "user_id": "test"},
-                  "response_json_field": "$.choices[0].message.content",
+                  "headers": {"0": {"key": "Content-Type", "value": "application/json"}, "Content-Type": "application/json"},
+                  "req_template_json_object": {},
+                  "response_json_field": "$.response",
                   "response_json": True,
                   "verify_ssl": True
               }
