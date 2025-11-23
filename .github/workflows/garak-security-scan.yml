@@ -42,23 +42,23 @@ jobs:
 
           # Start security scan
           print("Starting Garak security scan...")
-          print(f"Target endpoint: https://api.anthropic.com/v1/messages")
+          print(f"Target endpoint: https://vulnerable-chatbot-765684604189.us-central1.run.app/chat")
           print(f"Probes: dan,security,privacy,toxicity,hallucination,performance,robustness,ethics,stereotype")
 
           scan = client.scans.create(
               generator="rest",
-              model_name="https://api.anthropic.com/v1/messages",
+              model_name="https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
               probe_categories=["dan", "security", "privacy", "toxicity", "hallucination", "performance", "robustness", "ethics", "stereotype"],
               name=f"GitHub Actions Scan",
               description=f"Automated scan from GitHub Actions",
               parallel_attempts=4,
               use_free_tier=False,
               rest_config={
-                  "uri": "https://api.anthropic.com/v1/messages",
+                  "uri": "https://vulnerable-chatbot-765684604189.us-central1.run.app/chat",
                   "method": "POST",
-                  "headers": {"x-api-key": "${{ secrets.X_API_KEY }}", "anthropic-version": "2023-06-01", "content-type": "application/json", "Content-Type": "application/json"},
+                  "headers": {"Content-Type": "application/json"},
                   "req_template_json_object": {},
-                  "response_json_field": "$.content[0].text",
+                  "response_json_field": "$.response",
                   "response_json": True,
                   "verify_ssl": True
               }
